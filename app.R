@@ -1,51 +1,49 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
+library(shinydashboard)
+library(DT)
+library(dashboardthemes)
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
+ncdc_data <- read.csv("C:/Users/HP/Desktop/Business-Data_Lab/covid19-ncdc/ncdc_data.csv") 
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
+ui <- dashboardPage( 
+              dashboardHeader(
+                  title = "COVID-19 NIGERIA", disable = TRUE),
 
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
+              dashboardSidebar(disable = TRUE),
+            dashboardBody(
+              shinyDashboardThemes(theme = "onenote"),
+                tabItems(
+                  tabItem(tabName = "dashboard", h2("COVID19-NIGERIA"),
+                          fluidRow(
+                            box(title = "Samples Tested", background = "olive" )),
+                          fluidRow(
+                            box(title = "Confirmed Cases", background = "blue", width=3),
+                            box(title = "Active Cases", background = "yellow",width=3),
+                            box(title = "Discharged Cases", background = "green", width=3),
+                            box(title = "Death", background = "red", width=3, br(),
+                                textOutput("number"))),
+                          fluidRow(
+                            box(title = "Confirmed Cases by State",  status = "primary", width = 7,
+                                DTOutput("table", "Confirmed Cases by State" )),
+                          box(title = "Interactive map", width = 5)) )
+                  
+  )),
 
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
 
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
+  output$number = renderText(
+    {
+      print("3,155")
+    }
+  )
+  
+  
+  output$table = renderDT(
+    {
+      ncdc_data
+    }
+  )
+  }
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
-}
-
-# Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
